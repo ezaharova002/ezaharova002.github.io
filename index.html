@@ -485,7 +485,7 @@ html.hold .word span,html.hold .fig,html.hold .hi,html.hold .info,html.hold .cta
   <div class="row row3" data-g>
     <button class="tile" data-r data-v="promo-general" data-dur="44" aria-label="Промо концерта, 44 секунды. Смотреть со звуком"></button>
     <button class="tile" data-r data-v="promo-mirele" data-dur="33" aria-label="Промо концерта, 33 секунды. Смотреть со звуком"></button>
-    <button class="tile" data-r data-v="promo-iowa" data-dur="15" aria-label="Промо концерта, 15 секунд. Смотреть со звуком"></button>
+    <button class="tile" data-r data-v="promo-iowa" data-silent data-dur="15" aria-label="Промо концерта, 15 секунд"></button>
   </div>
 
   <h3 class="genre d" data-r>Документальный фильм</h3>
@@ -645,11 +645,11 @@ html.hold .word span,html.hold .fig,html.hold .hi,html.hold .info,html.hold .cta
     var box=document.createElement('div');box.className='in3d';
     var v=document.createElement('video');
     v.muted=true;v.loop=true;v.playsInline=true;v.preload='none';
-    v.poster=MEDIA+slug+'.jpg';v.dataset.src=MEDIA+slug+'.mp4';
+    v.poster=MEDIA+slug+'.jpg';v.dataset.src=MEDIA+slug+'.p.mp4';
     v.setAttribute('muted','');v.setAttribute('playsinline','');v.tabIndex=-1;
     var s=document.createElement('span');s.textContent=mmss(dur);
     box.appendChild(v);box.appendChild(s);t.appendChild(box);
-    t.addEventListener('click',function(){openLb(slug)});
+    t.addEventListener('click',function(){openLb(slug,t.hasAttribute('data-silent'))});
     if(fine&&!reduce){
       /* наклон плитки за курсором */
       t.addEventListener('pointermove',function(e){
@@ -691,8 +691,10 @@ html.hold .word span,html.hold .fig,html.hold .hi,html.hold .info,html.hold .cta
 
   /* ── Просмотр со звуком ── */
   var lb=document.getElementById('lb'),lbv=document.getElementById('lbv');
-  function openLb(slug){
-    lbv.src=MEDIA+slug+'.mp4';lbv.poster=MEDIA+slug+'.jpg';
+  function openLb(slug,silent){
+    lbv.muted=!!silent;
+    if(silent)lbv.setAttribute('muted','');else lbv.removeAttribute('muted');
+    lbv.src=MEDIA+slug+(silent?'.p.mp4':'.mp4');lbv.poster=MEDIA+slug+'.jpg';
     if(lenis)lenis.stop();
     if(lb.showModal)lb.showModal();else lb.setAttribute('open','');
     var p=lbv.play();if(p&&p.catch)p.catch(function(){});
@@ -712,7 +714,8 @@ html.hold .word span,html.hold .fig,html.hold .hi,html.hold .info,html.hold .cta
   if(fine&&!reduce){
     addEventListener('pointermove',function(e){
       mx=e.clientX;my=e.clientY;
-      cur.classList.toggle('on',!!(e.target.closest&&e.target.closest('.tile')));
+      var tile=e.target.closest&&e.target.closest('.tile');
+      cur.classList.toggle('on',!!(tile&&!tile.hasAttribute('data-silent')));
       px=e.clientX/innerWidth-.5;py=e.clientY/innerHeight-.5;
       if(!loop)loop=requestAnimationFrame(tick);
     },{passive:true});
